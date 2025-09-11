@@ -1,5 +1,5 @@
 {
-  "name": "yta",
+  "name": "youtube-api-vercel",
   "version": "1.0.0",
   "main": "index.js",
   "type": "commonjs",
@@ -8,7 +8,7 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
-    "youtube.js": "^6.0.0"
+    "youtubei.js": "^15.0.1"
   },
   "engines": {
     "node": ">=18"

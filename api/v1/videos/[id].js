@@ -1,4 +1,4 @@
-const { Innertube } = require('youtube.js');
+const { Innertube } = require('youtubei.js');
 
 export default async function handler(req, res) {
   const { id } = req.query;
