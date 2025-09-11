@@ -1,4 +1,4 @@
-import { Innertube } from 'youtube.js';
+const { Innertube } = require('youtube.js');
 
 export default async function handler(req, res) {
   const { id } = req.query;

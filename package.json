@@ -1,0 +1,16 @@
+{
+  "name": "yta",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "youtube.js": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
