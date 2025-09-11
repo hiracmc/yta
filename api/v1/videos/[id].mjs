@@ -1,16 +1,48 @@
 import { Innertube } from 'youtubei.js';
 
+
+
 export default async function handler(req, res) {
   const { id } = req.query;
 
   try {
     const yt = await Innertube.create();
     const info = await yt.getInfo(id);
+    console.log(JSON.stringify(info.related_videos))
+
+    const formats = [
+      ...(info.streaming_data?.formats || []),
+      ...(info.streaming_data?.adaptive_formats || [])
+    ];
+
+    const formatStreams = formats.map(f => {
+      const url = f.url || f.signature_cipher;
+
+      return {
+        url,
+        itag: String(f.itag),
+        type: f.mime_type,
+        quality: f.quality || f.audio_quality || 'unknown',
+        bitrate: f.bitrate,
+        fps: f.fps || null,
+        size: f.width && f.height ? `${f.width}x${f.height}` : null,
+        resolution: f.quality_label || null,
+        qualityLabel: f.quality_label || null,
+        container: f.mime_type?.split('/')[1]?.split(';')[0] || null,
+        encoding: f.mime_type?.includes('avc1')
+          ? 'h264'
+          : f.mime_type?.includes('vp9')
+          ? 'vp9'
+          : f.mime_type?.includes('opus')
+          ? 'opus'
+          : null
+      };
+    });
 
     const recommendedVideos = (info.related_videos || []).map(v => ({
       videoId: v.id,
       title: v.title,
-      videoThumbnails: v.thumbnails || [],
+      videoThumbnails: v.thumbnails || v.videoThumbnails || v.thumbnail?.thumbnails || [],
       author: v.author?.name,
       authorUrl: v.author?.channel_url,
       authorId: v.author?.id,
@@ -54,7 +86,7 @@ export default async function handler(req, res) {
       isUpcoming: info.basic_info.is_upcoming,
       dashUrl: info.streaming_data?.dash_manifest_url,
       adaptiveFormats: info.streaming_data?.adaptive_formats || [],
-      formatStreams: info.streaming_data?.formats || [],
+      formatStreams,
       captions: info.captions || [],
       recommendedVideos
     };
