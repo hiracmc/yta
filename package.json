@@ -1,16 +1,12 @@
 {
   "name": "youtube-api-vercel",
   "version": "1.0.0",
-  "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod"
   },
   "dependencies": {
     "youtubei.js": "^15.0.1"
-  },
-  "engines": {
-    "node": ">=18"
   }
 }
