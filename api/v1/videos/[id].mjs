@@ -1,6 +1,5 @@
 import { Innertube } from 'youtubei.js';
-import express from "express";
-const app = express();
+
 
 
 function timeToSeconds(timeString) {
@@ -111,14 +110,17 @@ function time(text) {
 }
 
 
-app.get("/api/v1/videos/:id", async (req, res) => {
-  const { id } = req.params;
+
+
+export default async function handler(req, res) {
+  const { id } = req.query;
 
   try {
     if (!id) {
       return res.status(400).json({ error: "Missing id parameter" });
     }
 
+   
     const yt = await Innertube.create();
     const info = await yt.getInfo(id);
 
@@ -167,7 +169,6 @@ app.get("/api/v1/videos/:id", async (req, res) => {
         published: time(v.metadata.metadata.metadata_rows[1]?.metadata_parts?.[1]?.text?.text),
         publishedText: translate(v.metadata.metadata.metadata_rows[1]?.metadata_parts?.[1]?.text?.text)
       }));
-
     const data = {
       type: "video",
       title: info.basic_info.title,
@@ -193,9 +194,7 @@ app.get("/api/v1/videos/:id", async (req, res) => {
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.json(data);
-
   } catch (err) {
     res.status(500).json({ error: err.message, stack: err.stack });
   }
-});
-
+}
