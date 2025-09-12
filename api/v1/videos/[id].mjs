@@ -115,7 +115,9 @@ export default async function handler(req, res) {
   const {id}  = req.query;
 
   try {
-    const yt = await Innertube.create();
+    const yt = await Innertube.create({
+  cookie: 'GPS=1; YSC=ve7zDSvo0vY; VISITOR_INFO1_LIVE=Kg_4A4pVdpI; VISITOR_PRIVACY_METADATA=CgJKUBIEGgAgPQ%3D%3D; __Secure-ROLLOUT_TOKEN=CM6zppfP1tP4wwEQ9czBqvnRjwMYsPeJq_nRjwM%3D; PREF=f6=40000000&tz=Asia.Tokyo; ST-1b=disableCache=true&itct=CA8QsV4iEwj5gpur-dGPAxXfimYCHauzDDbKAQRiW41f&csn=htmASWOd_00Hf5Aa&endpoint=%7B%22clickTrackingParams%22%3A%22CA8QsV4iEwj5gpur-dGPAxXfimYCHauzDDbKAQRiW41f%22%2C%22commandMetadata%22%3A%7B%22webCommandMetadata%22%3A%7B%22url%22%3A%22%2F%22%2C%22webPageType%22%3A%22WEB_PAGE_TYPE_BROWSE%22%2C%22rootVe%22%3A3854%2C%22apiUrl%22%3A%22%2Fyoutubei%2Fv1%2Fbrowse%22%7D%7D%2C%22browseEndpoint%22%3A%7B%22browseId%22%3A%22FEwhat_to_watch%22%7D%7D'
+});
     const info = await yt.getInfo(id);
     console.log("あなたのapiが使用されました")
 
