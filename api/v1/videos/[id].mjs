@@ -117,7 +117,7 @@ export default async function handler(req, res) {
   try {
     const yt = await Innertube.create();
     const info = await yt.getInfo(id);
-    console.log(JSON.stringify(info.watch_next_feed[0].metadata.metadata_rows))
+    console.log("あなたのapiが使用されました")
 
     const formats = [
       ...(info.streaming_data?.formats || []),
