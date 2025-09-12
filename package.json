@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "",
+    "dev": "npm run index.js",
     "deploy": "vercel --prod"
   },
   "dependencies": {
