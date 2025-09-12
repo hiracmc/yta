@@ -1,4 +1,7 @@
 import { Innertube } from 'youtubei.js';
+import express from "express";
+const app = express();
+
 
 function timeToSeconds(timeString) {
   if (!timeString || typeof timeString !== 'string') {
@@ -117,10 +120,8 @@ function time(text) {
 
 
 
-
-
-export default async function handler(req, res) {
-  const {id}  = req.query;
+app.get("/api/v1/videos/:id", async (req, res) =>  {
+  const { id } = req.params;
 
   try {
     const isid = event.queryStringParameters.id;
@@ -226,4 +227,4 @@ export default async function handler(req, res) {
   } catch (err) {
     res.status(500).json({ error: err.message, data:err.stack });
   }
-}
+})
