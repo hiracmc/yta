@@ -75,10 +75,8 @@ function time(text) {
   if (parts.length < 2 || parts[parts.length - 1] !== 'ago') {
     return null;
   }
-
   const value = parseInt(parts[0], 10);
   const unit = parts[1];
-
   const date = new Date();
 
   switch (unit) {
@@ -109,36 +107,20 @@ function time(text) {
     default:
       return null;
   }
-
   return date;
-  
 }
 
 
-
-
-
-
-
-app.get("/api/v1/videos/:id", async (req, res) =>  {
+app.get("/api/v1/videos/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const isid = event.queryStringParameters.id;
-    if (!isid) {
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({ error: "Missing id parameter" })
-      };
+    if (!id) {
+      return res.status(400).json({ error: "Missing id parameter" });
     }
-    const yt = await Innertube.create({
-  cookie: 'GPS=1; YSC=ve7zDSvo0vY; VISITOR_INFO1_LIVE=Kg_4A4pVdpI; VISITOR_PRIVACY_METADATA=CgJKUBIEGgAgPQ%3D%3D; __Secure-ROLLOUT_TOKEN=CM6zppfP1tP4wwEQ9czBqvnRjwMYsPeJq_nRjwM%3D; PREF=f6=40000000&tz=Asia.Tokyo; ST-1b=disableCache=true&itct=CA8QsV4iEwj5gpur-dGPAxXfimYCHauzDDbKAQRiW41f&csn=htmASWOd_00Hf5Aa&endpoint=%7B%22clickTrackingParams%22%3A%22CA8QsV4iEwj5gpur-dGPAxXfimYCHauzDDbKAQRiW41f%22%2C%22commandMetadata%22%3A%7B%22webCommandMetadata%22%3A%7B%22url%22%3A%22%2F%22%2C%22webPageType%22%3A%22WEB_PAGE_TYPE_BROWSE%22%2C%22rootVe%22%3A3854%2C%22apiUrl%22%3A%22%2Fyoutubei%2Fv1%2Fbrowse%22%7D%7D%2C%22browseEndpoint%22%3A%7B%22browseId%22%3A%22FEwhat_to_watch%22%7D%7D'
-});
+
+    const yt = await Innertube.create();
     const info = await yt.getInfo(id);
-    console.log("あなたのapiが使用されました")
 
     const formats = [
       ...(info.streaming_data?.formats || []),
@@ -147,7 +129,6 @@ app.get("/api/v1/videos/:id", async (req, res) =>  {
 
     const formatStreams = formats.map(f => {
       const url = f.url || f.signature_cipher;
-
       return {
         url,
         itag: String(f.itag),
@@ -169,62 +150,52 @@ app.get("/api/v1/videos/:id", async (req, res) =>  {
       };
     });
 
-    const recommendedVideos =(info.watch_next_feed).filter(item => item.content_type === 'VIDEO').map(v => ({
-      ispontubeapi:true,
-      videoId: v.content_id,
-      title: v.metadata.title.text,
-      videoThumbnails: v.content_image.image,
-      author: v.metadata.metadata.metadata_rows[0].metadata_parts[0].text.text,
-      authorUrl: `/channel/${v.metadata.image?.decoratedAvatarView?.renderer_context?.command_context?.on_tap?.browseEndpoint?.payload?.browseId}`,
-      authorId: v.metadata.image?.decoratedAvatarView?.renderer_context?.command_context?.on_tap?.browseEndpoint?.payload?.browseId,
-      authorVerified: (v.metadata?.metadata?.metadata_rows?.[0]?.metadata_parts?.[0]?.text?.runs?.[0]?.attachment?.element?.type?.imageType?.image?.sources?.[0]?.clientResource?.imageName === 'CHECK_CIRCLE_FILLED'),
-      lengthSeconds: timeToSeconds(v.content_image?.overlays?.[0]?.badges?.[0]?.text),
-      viewCountText: v.metadata.metadata.metadata_rows[1].metadata_parts[0].text.text.replace(/ views?/i, '').trim(),
-      viewCount: parseViewCount(v.metadata.metadata.metadata_rows[1].metadata_parts[0].text.text),
-      published: time(v.metadata.metadata.metadata_rows[1]?.metadata_parts?.[1]?.text?.text),
-      publishedText: translate(v.metadata.metadata.metadata_rows[1]?.metadata_parts?.[1]?.text?.text)
-    }));
+    const recommendedVideos = (info.watch_next_feed || [])
+      .filter(item => item.content_type === 'VIDEO')
+      .map(v => ({
+        ispontubeapi: true,
+        videoId: v.content_id,
+        title: v.metadata.title.text,
+        videoThumbnails: v.content_image.image,
+        author: v.metadata.metadata.metadata_rows[0].metadata_parts[0].text.text,
+        authorUrl: `/channel/${v.metadata.image?.decoratedAvatarView?.renderer_context?.command_context?.on_tap?.browseEndpoint?.payload?.browseId}`,
+        authorId: v.metadata.image?.decoratedAvatarView?.renderer_context?.command_context?.on_tap?.browseEndpoint?.payload?.browseId,
+        authorVerified: false, // 確認ロジックは必要なら直す
+        lengthSeconds: timeToSeconds(v.content_image?.overlays?.[0]?.badges?.[0]?.text),
+        viewCountText: v.metadata.metadata.metadata_rows[1].metadata_parts[0].text.text.replace(/ views?/i, '').trim(),
+        viewCount: parseViewCount(v.metadata.metadata.metadata_rows[1].metadata_parts[0].text.text),
+        published: time(v.metadata.metadata.metadata_rows[1]?.metadata_parts?.[1]?.text?.text),
+        publishedText: translate(v.metadata.metadata.metadata_rows[1]?.metadata_parts?.[1]?.text?.text)
+      }));
 
     const data = {
       type: "video",
       title: info.basic_info.title,
       videoId: info.basic_info.id,
       videoThumbnails: info.basic_info.thumbnail || [],
-      storyboards: info.storyboards || [],
       description: info.basic_info.short_description,
       published: info.basic_info.publish_date,
       publishedText: info.basic_info.publish_date_text,
       keywords: info.basic_info.keywords,
       viewCount: info.basic_info.view_count,
       likeCount: info.basic_info.like_count,
-      paid: info.basic_info.is_paid,
-      premium: info.basic_info.is_premium,
-      isFamilyFriendly: info.basic_info.is_family_safe,
-      allowedRegions: info.basic_info.available_countries,
-      genre: info.basic_info.category,
-      genreUrl: null,
       author: info.basic_info.author?.name,
       authorId: info.basic_info.author?.id,
       authorUrl: info.basic_info.author?.channel_url,
       authorVerified: info.basic_info.author?.is_verified,
-      authorThumbnails: info.secondary_info.owner.author.thumbnails || [],
       subCountText: info.basic_info.author?.subscriber_count_text,
       lengthSeconds: info.basic_info.duration,
-      allowRatings: true,
-      isListed: true,
       liveNow: info.basic_info.is_live,
-      isPostLiveDvr: info.basic_info.is_post_live_dvr,
       isUpcoming: info.basic_info.is_upcoming,
-      dashUrl: info.streaming_data?.dash_manifest_url,
-      adaptiveFormats: info.streaming_data?.adaptive_formats || [],
       formatStreams,
-      //captions: info.captions || [],
       recommendedVideos
     };
-    return {statusCode: 200,
-    headers: { "Content-Type": "application/json","Access-Control-Allow-Origin": "*" },
-    body: json(data)}
+
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.json(data);
+
   } catch (err) {
-    res.status(500).json({ error: err.message, data:err.stack });
+    res.status(500).json({ error: err.message, stack: err.stack });
   }
-})
+});
+
