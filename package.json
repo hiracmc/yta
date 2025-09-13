@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run index.js",
+    "start": "npm run index.js",
     "deploy": "vercel --prod"
   },
   "dependencies": {
